@@ -1,5 +1,6 @@
 /*
 TOS shell implementation by Kriti Upadhyaya
+918822299
 Fall 2019
 */
 
@@ -37,9 +38,12 @@ int match_command(char *tos_command, char *user_command)
 		return 0;
 }
 
+
 /*
-	The function ifhistory is executed when 
+	The function ifhistory implements history command.  
 */
+
+
 void ifhistory(int windowID, int command_num, char (*history) [20], int ifhistory_check)
 {
 	if(ifhistory_check == 0)
@@ -53,6 +57,12 @@ void ifhistory(int windowID, int command_num, char (*history) [20], int ifhistor
 		wm_print(windowID, "\n%2d %s", j+1, history[j]);
 	}
 }
+
+
+/*
+* Implementation of ps process output. Lists all the processes with their states.
+*/
+
 
 void ifps(int windowID)
 {
@@ -89,13 +99,18 @@ void ifps(int windowID)
 	}
 }
 
+
+/*
+* The function is called from !<number> implementation. The function extracts the command number from user input and verifies if it is a number and return the number.
+*/
+
+
 int ifnumber(int windowID, char* command_buffer)
 {
 	char* user_command;
 	user_command = command_buffer;
 	//wm_print(windowID, "\n%s", user_command);
 	int number = 0, history_index=0;
-	//user_command++;
 	char c;
 	
 	while(*user_command!='\0')
@@ -114,6 +129,12 @@ int ifnumber(int windowID, char* command_buffer)
 	//wm_print(windowID, "command num: %d", history_index);
 	return history_index;
 }
+
+
+/**
+* The function echo checks if the command entered by user is an echo command. If its an encho command then executes it by printing the message followed by echo command on shell.
+*/
+
 
 int echo(int windowID, char *tos_command, char *cmd_echo)
 {
@@ -153,9 +174,11 @@ int echo(int windowID, char *tos_command, char *cmd_echo)
 	return check;
 }
 
+
 /**
 * The function checks if the command is a !<number> command.
 */
+
 
 int check_number(char *tos_command, char *user_command)
 {
@@ -167,7 +190,7 @@ int check_number(char *tos_command, char *user_command)
 
 
 /**
-* The function implement !<number> command by finding the command from history buffer and then implementing it.		
+* The function implement !<number> command by finding the command from history buffer and then implementing it. Function supports multiple commands.		
 */
 
 
@@ -288,6 +311,9 @@ int execute_command(int windowID, char *this_command, int command_num, char (*hi
 	
 }
 
+/**
+* The function checks for multiple commands. The function returns 0 if there is only one command. If there are multiple commands the function makes necessary calls to implement those commands in the input order.
+*/
 
 int check_multiple_commands(int windowID, char* command, int command_size, int command_num, char (*history) [20])
 {
@@ -298,7 +324,7 @@ int check_multiple_commands(int windowID, char* command, int command_size, int c
 
 	while(*command!='\0')
 	{
-		if(*command == ';' && size!=0)
+		if(*command == ';' && size!=0)	//Checking for multiple commands
 		{
 			int result_multi = 0;
 			multiple = 1;
@@ -306,7 +332,7 @@ int check_multiple_commands(int windowID, char* command, int command_size, int c
 			
 			result_multi = execute_command(windowID, cmd, command_num, history);
 			if (result_multi == 0)
-				wm_print(windowID, "Invalid command : %s", cmd);
+				wm_print(windowID, "Invalid command : %s. Please check help for information.", cmd);
 			size = 0;
 			multi = malloc(command_size-size);
 			cmd = multi;
@@ -332,13 +358,16 @@ int check_multiple_commands(int windowID, char* command, int command_size, int c
 }
 
 
+/**
+* The function reads user input using keyb_get_keystroke function. The get_input check for special cases like backspace and enter then check if there are multiple commands. The function then call appropriate functions to execute the commands. 
+*/
+
+
 void get_input(int windowID)
 {
   char *command_buffer;
   char *input_char, *traverse;
   char history[MAX_HISTORY][20];
-	
-	//hist_ptr = history[MAX_HISTORY];
   traverse = malloc(21);
   int command_size = 20, entered_size = 0, command_num=0;
   command_buffer = malloc(21);
@@ -352,6 +381,9 @@ void get_input(int windowID)
       *input_char = keyb_get_keystroke(windowID, TRUE);
       switch(*input_char)
       {
+	/*Checking for different input case such as backspace and enter.
+	  When the user press enter, the user input is executed.
+	*/
 					
         case BACKSPACE:
 	 if(entered_size == 0)
@@ -412,7 +444,7 @@ void get_input(int windowID)
 	     multiple_commands = check_multiple_commands(windowID, command_buffer, entered_size, command_num, history);
 	
 	    /*After checking for multiple commands, if the user 
-	      input is a single command it will run.	
+	      input is a single command it will run by calling execute_command.	
 	    */
 	     
 	     if (multiple_commands == 0)
@@ -439,7 +471,7 @@ void get_input(int windowID)
   input_char++;
 			
  }
- else
+ else			//Implementation for input buffer overload.
  {
    wm_print(windowID, "\nBuffer overflow: TOS supports command size less than 20 char");
    free(command_buffer);
@@ -454,6 +486,12 @@ void get_input(int windowID)
 
 }
 
+
+/**
+ The function creates a shell window and displays the shell then calls  get_input to read user input. 
+*/
+
+
 void shell_process()
 {
 	int windowID = wm_create(0,5,60,20);
@@ -463,6 +501,12 @@ void shell_process()
 	get_input(windowID);
 	
 }
+
+
+/**
+* Entry point of shell process.
+*/
+
 
 void start_shell()
 {
